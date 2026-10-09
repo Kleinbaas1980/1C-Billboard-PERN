@@ -5,6 +5,7 @@ import { pool, transaction } from "../configs/database.js";
 import { hashPassword } from "../utils/crypto.js";
 import { emailSchema, passwordSchema } from "../utils/validation.js";
 import { HttpError } from "../utils/errors.js";
+
 export async function list(_req: Request, res: Response) {
   res.json(
     (
@@ -14,6 +15,7 @@ export async function list(_req: Request, res: Response) {
     ).rows,
   );
 }
+
 export async function save(req: Request, res: Response) {
   const a = z
     .object({
@@ -53,6 +55,7 @@ export async function save(req: Request, res: Response) {
   });
   res.json({ ok: true });
 }
+
 export async function deactivate(req: Request, res: Response) {
   const email = emailSchema.parse(req.body.email);
   await transaction(async (c) => {
@@ -81,6 +84,7 @@ export async function deactivate(req: Request, res: Response) {
   });
   res.json({ ok: true });
 }
+
 export async function uploadPassword(req: Request, res: Response) {
   const a = z
     .object({ email: emailSchema, password: passwordSchema })

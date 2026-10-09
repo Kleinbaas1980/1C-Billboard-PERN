@@ -4,6 +4,7 @@ import { env } from "../configs/env.js";
 import { pool } from "../configs/database.js";
 import { HttpError } from "../utils/errors.js";
 import type { AuthUser, Role } from "../types/index.js";
+
 export async function requireAuth(
   req: Request,
   _res: Response,
@@ -43,6 +44,7 @@ export async function requireAuth(
     next(e);
   }
 }
+
 export function roles(...allowed: Role[]) {
   return (req: Request, _res: Response, next: NextFunction) => {
     if (!req.user || !allowed.includes(req.user.role)) {

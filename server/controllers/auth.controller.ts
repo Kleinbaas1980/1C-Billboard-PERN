@@ -19,6 +19,7 @@ import {
 } from "../utils/cookies.js";
 import { emailSchema, passwordSchema } from "../utils/validation.js";
 import { HttpError } from "../utils/errors.js";
+
 export async function csrfToken(_req: Request, res: Response) {
   const token = signCsrf(randomToken(), env.CSRF_SECRET);
   res.cookie("bc_csrf", token, {
@@ -28,6 +29,7 @@ export async function csrfToken(_req: Request, res: Response) {
   });
   res.set("Cache-Control", "no-store").json({ token });
 }
+
 export async function login(req: Request, res: Response) {
   const { email, password } = z
     .object({ email: emailSchema, password: z.string().min(1).max(128) })
@@ -51,6 +53,7 @@ export async function login(req: Request, res: Response) {
   setSessionCookies(res, u.id, sid, refresh);
   res.json({ user: publicUser(u) });
 }
+
 export async function refresh(req: Request, res: Response) {
   const token = req.cookies?.bc_refresh;
   if (typeof token !== "string" || !/^[a-f0-9]{64}$/.test(token))
@@ -72,9 +75,11 @@ export async function refresh(req: Request, res: Response) {
   setSessionCookies(res, result.id, result.session_id, nextToken);
   res.json({ user: publicUser(result) });
 }
+
 export function me(req: Request, res: Response) {
   res.json({ user: publicUser(req.user!) });
 }
+
 export async function logout(req: Request, res: Response) {
   const token = req.cookies?.bc_refresh;
   if (typeof token === "string")
@@ -85,6 +90,7 @@ export async function logout(req: Request, res: Response) {
   clearSessionCookies(res);
   res.json({ ok: true });
 }
+
 export async function changePassword(req: Request, res: Response) {
   const { currentPassword, newPassword } = z
     .object({

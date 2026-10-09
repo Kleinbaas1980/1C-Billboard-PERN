@@ -1,8 +1,8 @@
 "use client";
 import { useState } from "react";
 import { useAuth } from "@/contexts/auth-context";
-import { authApi } from "@/api/auth";
-import { apiError } from "@/api/http";
+import { authApi } from "@/services/auth";
+import { apiError } from "@/services/http";
 export default function Login() {
   const { user, loading, login, logout, reload } = useAuth();
   const [email, setEmail] = useState(""),

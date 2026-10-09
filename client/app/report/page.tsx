@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
-import { getAssets } from "@/api/assets";
-import { apiError } from "@/api/http";
+import { getAssets } from "@/services/assets";
+import { apiError } from "@/services/http";
 import { RequireAuth, useAuth } from "@/contexts/auth-context";
 import { isUrgent } from "@/lib/ratings";
 import PrintControls from "./print-controls";

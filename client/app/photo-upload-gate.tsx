@@ -1,5 +1,5 @@
 "use client";
-import { apiRequest } from "@/api/http";
+import { apiRequest } from "@/services/http";
 import { useEffect, useState } from "react";
 export default function PhotoUploadGate({
   asset,

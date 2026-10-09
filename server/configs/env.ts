@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { z } from "zod";
+
 const schema = z.object({
   NODE_ENV: z
     .enum(["development", "production", "test"])
@@ -14,6 +15,7 @@ const schema = z.object({
   BLOB_READ_WRITE_TOKEN: z.string().min(1),
   TRUST_PROXY_HOPS: z.coerce.number().int().min(0).default(0),
 });
+
 export const env = schema.parse(process.env);
 if (env.NODE_ENV === "production" && !env.CLIENT_ORIGIN.startsWith("https://"))
   throw Error("Production CLIENT_ORIGIN requires HTTPS");

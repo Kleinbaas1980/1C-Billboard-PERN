@@ -7,8 +7,8 @@ import {
   type ReactNode,
 } from "react";
 import axios from "axios";
-import { authApi } from "@/api/auth";
-import { apiError } from "@/api/http";
+import { authApi } from "@/services/auth";
+import { apiError } from "@/services/http";
 import type { User } from "@/types";
 interface AuthContextValue {
   user: User | null;

@@ -1,5 +1,6 @@
 import { api } from "./http";
 import type { User } from "@/types";
+
 export const authApi = {
   me: async () => (await api.get<{ user: User }>("/auth/me")).data.user,
   login: async (email: string, password: string) =>

@@ -10,6 +10,7 @@ import { cookieOptions } from "../utils/cookies.js";
 import { randomToken, tokenHash, verifyPassword } from "../utils/crypto.js";
 import { HttpError } from "../utils/errors.js";
 import { consumeAttempt } from "../models/rate-limit.model.js";
+
 async function grant(req: Request, asset: string) {
   const token = req.cookies.bc_upload;
   if (typeof token !== "string") return false;
@@ -20,9 +21,11 @@ async function grant(req: Request, asset: string) {
     )
   ).rowCount;
 }
+
 export async function unlocked(req: Request, res: Response) {
   res.json({ unlocked: await grant(req, String(req.query.asset)) });
 }
+
 export async function unlock(req: Request, res: Response) {
   const asset = String(req.body.asset || "");
   const password = String(req.body.password || "");
@@ -65,6 +68,7 @@ export async function unlock(req: Request, res: Response) {
   res.cookie("bc_upload", token, { ...cookieOptions, maxAge: 1800000 });
   res.json({ ok: true });
 }
+
 export async function upload(req: Request, res: Response) {
   const asset = String(req.body.asset || "");
   if (!(await grant(req, asset)))
@@ -134,6 +138,7 @@ export async function upload(req: Request, res: Response) {
   }
   res.status(201).json({ id });
 }
+
 export async function read(req: Request, res: Response, next: NextFunction) {
   z.uuid().parse(req.params.id);
   const p = (
@@ -158,6 +163,7 @@ export async function read(req: Request, res: Response, next: NextFunction) {
     .on("error", next)
     .pipe(res);
 }
+
 export async function remove(req: Request, res: Response) {
   z.uuid().parse(req.params.id);
   await transaction(async (c) => {

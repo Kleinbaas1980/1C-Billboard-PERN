@@ -1,5 +1,5 @@
 "use client";
-import { apiRequest } from "@/api/http";
+import { apiRequest } from "@/services/http";
 import { useEffect, useState } from "react";
 async function requests(): Promise<any[]> {
   const r = await apiRequest("/api/deletion-requests");

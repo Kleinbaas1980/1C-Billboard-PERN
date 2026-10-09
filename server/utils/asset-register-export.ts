@@ -1,6 +1,7 @@
 import { unzipSync, zipSync, strFromU8, strToU8 } from "fflate";
 import { conditions, priorities, maintenanceTypes } from "./ratings.js";
 import { templateBase64 } from "./asset-register-template.js";
+
 const xml = (v: unknown) =>
   String(v ?? "")
     .slice(0, 32767)

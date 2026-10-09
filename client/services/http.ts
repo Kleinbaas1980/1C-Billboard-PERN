@@ -1,9 +1,11 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
+
 export const api = axios.create({
   baseURL: "/api",
   withCredentials: true,
   timeout: 30000,
 });
+
 let csrfToken = "";
 let csrfPending: Promise<string> | null = null;
 let refreshPending: Promise<void> | null = null;

@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { api } from "@/api/http";
+import { api } from "@/services/http";
 import { useAuth } from "@/contexts/auth-context";
 import PhotoUploadGate from "../photo-upload-gate";
 export default function QRPage() {

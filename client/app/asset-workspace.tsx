@@ -1,6 +1,6 @@
 "use client";
-import { downloadRegister } from "@/api/assets";
-import { apiRequest } from "@/api/http";
+import { downloadRegister } from "@/services/assets";
+import { apiRequest } from "@/services/http";
 import PhotoUploadGate from "./photo-upload-gate";
 import { useEffect, useRef, useState } from "react";
 import {

@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { pool, transaction } from "../configs/database.js";
 import { HttpError } from "../utils/errors.js";
+
 export async function list(_req: Request, res: Response) {
   res.json(
     (
@@ -12,6 +13,7 @@ export async function list(_req: Request, res: Response) {
     ).rows,
   );
 }
+
 export async function request(req: Request, res: Response) {
   const a = z
     .object({
@@ -36,6 +38,7 @@ export async function request(req: Request, res: Response) {
   });
   res.status(201).json({ ok: true });
 }
+
 export async function review(req: Request, res: Response) {
   const a = z
     .object({ id: z.uuid(), decision: z.enum(["approved", "rejected"]) })

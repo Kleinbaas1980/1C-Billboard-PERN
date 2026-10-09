@@ -1,6 +1,7 @@
 "use client";
 import { QrCode, ShieldCheck, ClipboardCheck, Camera } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
+
 export default function Launch() {
   const { user } = useAuth();
   return (

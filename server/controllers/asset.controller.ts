@@ -5,9 +5,11 @@ import { assetSchema, ratingSchema } from "../utils/validation.js";
 import { HttpError } from "../utils/errors.js";
 import { assetRegisterXlsx } from "../utils/asset-register-export.js";
 import { env } from "../configs/env.js";
+
 export async function list(_req: Request, res: Response) {
   res.json(await listAssets());
 }
+
 export async function publicAsset(req: Request, res: Response) {
   const id = String(req.params.id);
   if (!/^[A-Z0-9-]{1,40}$/.test(id))
@@ -19,6 +21,7 @@ export async function publicAsset(req: Request, res: Response) {
   if (!rows[0]) throw new HttpError(404, "Asset unavailable.");
   res.json(rows[0]);
 }
+
 export async function save(req: Request, res: Response) {
   const a = assetSchema.parse(req.body);
   await transaction(async (c) => {
@@ -58,6 +61,7 @@ export async function save(req: Request, res: Response) {
   });
   res.json({ ok: true });
 }
+
 export async function ratings(req: Request, res: Response) {
   const a = ratingSchema.parse(req.body);
   const r = await pool.query(
@@ -67,6 +71,7 @@ export async function ratings(req: Request, res: Response) {
   if (!r.rowCount) throw new HttpError(404, "Asset unavailable.");
   res.json({ ok: true });
 }
+
 export async function excel(_req: Request, res: Response) {
   const assets = await listAssets();
   const photos = assets.flatMap((a) => a.photos);
