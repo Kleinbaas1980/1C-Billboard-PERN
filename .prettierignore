@@ -1,0 +1,5 @@
+node_modules
+.next
+dist
+package-lock.json
+server/utils/asset-register-template.ts
