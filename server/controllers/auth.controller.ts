@@ -46,7 +46,6 @@ async function emailToken(user: UserRow, purpose: "verify" | "reset") {
   try {
     await sendTokenEmail(user.email, token, purpose);
   } catch (error) {
-    console.log(error);
     throw new HttpError(503, "Reset/Verify Email failed. Please try again.");
   }
 }
@@ -172,7 +171,7 @@ export async function reset(req: Request, res: Response) {
     token: string;
     password: string;
   };
-  console.log(password);
+
   const passwordHash = await hashPassword(password);
 
   await transaction(async (db) => {

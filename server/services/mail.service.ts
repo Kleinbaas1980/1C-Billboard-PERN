@@ -19,7 +19,7 @@ export async function sendTokenEmail(
   const expires = purpose === "verify" ? "24 hours" : "30 minutes";
 
   const { error } = await resend.emails.send({
-    from: "1 Crew 1 Project <notifications@update.gisteraand.co.za>",
+    from: "1 Crew 1 Project <noreply@updates.1crew1project.co.za>",
     to: email,
     subject:
       purpose === "verify"

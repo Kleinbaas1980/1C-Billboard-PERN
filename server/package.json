@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node --watch --import tsx src/index.ts",
+    "dev": "NODE_OPTIONS=--network-family-autoselection-attempt-timeout=3000 node --watch --import tsx src/index.ts",
     "build": "tsc",
     "typecheck": "tsc --noEmit",
     "start": "node dist/src/index.js",
