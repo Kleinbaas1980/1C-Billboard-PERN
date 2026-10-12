@@ -1,4 +1,5 @@
 export type Role = "admin" | "assessor";
+
 export interface AuthUser {
   id: string;
   email: string;
@@ -7,15 +8,18 @@ export interface AuthUser {
   is_owner: boolean;
   sessionId: string;
 }
+
 declare global {
   namespace Express {
     interface Request {
       user?: AuthUser;
       userId?: string;
       requestId?: string;
+      validate?: unknown;
     }
   }
 }
+
 export interface UserRow {
   id: string;
   email: string;

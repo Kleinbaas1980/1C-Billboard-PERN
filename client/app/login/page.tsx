@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { authApi } from "@/services/auth";
 import { apiError } from "@/services/http";
+import Link from "next/link";
 export default function Login() {
   const { user, loading, login, logout, reload } = useAuth();
   const [email, setEmail] = useState(""),
@@ -10,7 +11,8 @@ export default function Login() {
     [newPassword, setNewPassword] = useState(""),
     [busy, setBusy] = useState(false),
     [message, setMessage] = useState("");
-  async function signIn(e: React.FormEvent) {
+
+  async function signIn(e: React.SubmitEvent) {
     e.preventDefault();
     setBusy(true);
     setMessage("");
@@ -37,7 +39,13 @@ export default function Login() {
         width="150"
         alt="1C empowered by 1 crew 1 project"
       />
-      <h1>{user ? "Your account" : "Team sign in"}</h1>
+      <h1>{user ? "Your account" : "Sign in"}</h1>
+      {message && (
+        <p role="status" className="text-red-400">
+          {message}
+        </p>
+      )}
+
       {loading ? (
         <p>Loading…</p>
       ) : user ? (
@@ -126,13 +134,16 @@ export default function Login() {
               onChange={(e) => setPassword(e.target.value)}
             />
           </label>
-          <button className="primary" disabled={busy}>
-            {busy ? "Signing in…" : "Sign in"}
-          </button>
+          <div className="flex flex-col py-4">
+            <button className="primary" disabled={busy}>
+              {busy ? "Signing in…" : "Sign in"}
+            </button>
+            <Link href={"/forgot"}>Forgot Password</Link>
+          </div>
+
           <p>Accounts are created by your administrator.</p>
         </form>
       )}
-      {message && <p role="status">{message}</p>}
       <p>
         <a href="/">Home</a>
       </p>

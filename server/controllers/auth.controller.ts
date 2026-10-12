@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import bcrypt from "bcrypt";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { pool, transaction } from "../configs/database.js";
@@ -19,6 +20,36 @@ import {
 } from "../utils/cookies.js";
 import { emailSchema, passwordSchema } from "../utils/validation.js";
 import { HttpError } from "../utils/errors.js";
+import { UserRow } from "../types/index.js";
+import { sendTokenEmail } from "../services/mail.service.js";
+
+async function emailToken(user: UserRow, purpose: "verify" | "reset") {
+  const token = randomToken();
+  await transaction(async (db) => {
+    await db.query(
+      "UPDATE auth_tokens SET used_at=now() WHERE user_id=$1 AND purpose=$2 AND used_at IS NULL",
+      [user.id, purpose],
+    );
+
+    await db.query(
+      "INSERT INTO auth_tokens(id,user_id,purpose,token_hash,expires_at) VALUES($1, $2, $3, $4, now()+($5 * interval '1 minute'))",
+      [
+        randomUUID(),
+        user.id,
+        purpose,
+        tokenHash(token),
+        purpose === "verify" ? 1440 : 30,
+      ],
+    );
+  });
+
+  try {
+    await sendTokenEmail(user.email, token, purpose);
+  } catch (error) {
+    console.log(error);
+    throw new HttpError(503, "Reset/Verify Email failed. Please try again.");
+  }
+}
 
 export async function csrfToken(_req: Request, res: Response) {
   const token = signCsrf(randomToken(), env.CSRF_SECRET);
@@ -117,4 +148,60 @@ export async function changePassword(req: Request, res: Response) {
   });
   clearSessionCookies(res);
   res.json({ ok: true });
+}
+
+export async function forgot(req: Request, res: Response) {
+  const { email } = req.validate as { email: string };
+  const user = await pool.query<UserRow>(
+    "SELECT * FROM USERS WHERE email = $1",
+    [email],
+  );
+
+  if (!user.rows[0]?.email) {
+    return res.status(404).json({ error: "Email not found!" });
+  } else {
+    await emailToken(user.rows[0], "reset");
+    res
+      .status(202)
+      .json({ message: "A password reset link has been sent to your email." });
+  }
+}
+
+export async function reset(req: Request, res: Response) {
+  const { token, password } = req.validate as {
+    token: string;
+    password: string;
+  };
+  console.log(password);
+  const passwordHash = await hashPassword(password);
+
+  await transaction(async (db) => {
+    const row = (
+      await db.query(
+        "SELECT * FROM auth_tokens WHERE token_hash=$1 AND purpose='reset' AND used_at IS NULL AND expires_at>now() FOR UPDATE",
+        [tokenHash(token)],
+      )
+    ).rows[0];
+    if (!row)
+      throw new HttpError(
+        400,
+        "This password reset link is invalid or expired.",
+      );
+    await db.query("UPDATE users SET password_hash=$1 WHERE id=$2", [
+      passwordHash,
+      row.user_id,
+    ]);
+    await db.query(
+      "UPDATE auth_tokens SET used_at=now() WHERE user_id=$1 AND purpose='reset' AND used_at IS NULL",
+      [row.user_id],
+    );
+    // await db.query(
+    //   "UPDATE auth_sessions SET revoked_at=now() WHERE user_id=$1",
+    //   [row.user_id],
+    // );
+  });
+
+  return res
+    .status(200)
+    .json({ message: "Password changed. Sign in with your new password." });
 }

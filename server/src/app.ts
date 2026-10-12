@@ -25,6 +25,12 @@ app.use(
     legacyHeaders: false,
   }),
 );
+
+app.use((req, _res, next) => {
+  console.log(req.method, req.originalUrl, req.headers.origin);
+  next();
+});
+
 app.use(express.json({ limit: "256kb" }));
 app.use(cookieParser());
 app.use(

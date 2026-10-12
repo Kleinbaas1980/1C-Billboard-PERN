@@ -15,4 +15,18 @@ export const authApi = {
   changePassword: async (currentPassword: string, newPassword: string) => {
     await api.post("/auth/password", { currentPassword, newPassword });
   },
+
+  // authApi
+  forgotPassword: async (email: string) =>
+    (await api.post<{ message: string }>("/auth/forgot-password", { email }))
+      .data.message,
+
+  // services/auth.ts
+  resetPassword: async (token: string, password: string) =>
+    (
+      await api.post<{ message: string }>("/auth/reset-password", {
+        token,
+        password,
+      })
+    ).data.message,
 };

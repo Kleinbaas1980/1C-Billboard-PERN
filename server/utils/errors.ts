@@ -1,14 +1,17 @@
 import type { Request, Response, NextFunction } from "express";
 import { ZodError } from "zod";
 import multer from "multer";
+
 export class HttpError extends Error {
   constructor(
     public status: number,
     message: string,
+    public details?: Record<string, unknown>,
   ) {
     super(message);
   }
 }
+
 export function errorHandler(
   err: unknown,
   req: Request,
@@ -17,6 +20,11 @@ export function errorHandler(
 ) {
   if (res.headersSent) {
     res.end();
+    return;
+  }
+
+  if (err instanceof HttpError) {
+    res.status(err.status).json({ error: err.message, ...(err.details ?? {}) });
     return;
   }
   if (err instanceof HttpError) {
