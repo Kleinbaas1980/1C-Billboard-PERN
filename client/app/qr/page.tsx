@@ -9,6 +9,7 @@ export default function QRPage() {
       id: string;
       company: string;
       advertiser: string;
+      hasMainImage: boolean;
     } | null>(null),
     [loading, setLoading] = useState(true);
   useEffect(() => {
@@ -33,7 +34,20 @@ export default function QRPage() {
         ) : (
           <>
             <div className="eyebrow">BILLBOARD ASSET</div>
-            <h1 className="qr-public-number">{row.id}</h1>
+            <div className="qr-hero">
+              <h1 className="qr-public-number">{row.id}</h1>
+              {row.hasMainImage && (
+                <img
+                  className="qr-main-image"
+                  src={
+                    "/api/public/assets/" +
+                    encodeURIComponent(row.id) +
+                    "/main-image"
+                  }
+                  alt={"Billboard " + row.id}
+                />
+              )}
+            </div>
             <dl>
               <div>
                 <dt>Owner of asset</dt>

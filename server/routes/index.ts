@@ -4,13 +4,17 @@ import assetRoutes from "./asset.routes.js";
 import memberRoutes from "./member.routes.js";
 import photoRoutes from "./photo.routes.js";
 import deletionRoutes from "./deletion.routes.js";
-import { publicAsset } from "../controllers/asset.controller.js";
+import {
+  publicAsset,
+  publicMainImage,
+} from "../controllers/asset.controller.js";
 import { uploadPassword } from "../controllers/member.controller.js";
 import { unlock, unlocked } from "../controllers/photo.controller.js";
 import { requireAuth, roles } from "../middleware/auth.js";
 const router = Router();
 router.use("/auth", authRoutes);
 router.get("/public/assets/:id", publicAsset);
+router.get("/public/assets/:id/main-image", publicMainImage);
 router.use(requireAuth);
 router.use("/assets", assetRoutes);
 router.use("/members", memberRoutes);

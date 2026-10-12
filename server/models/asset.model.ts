@@ -9,7 +9,11 @@ export async function listAssets() {
 
   const photos = (
     await pool.query(
-      "SELECT p.id,p.asset_id,p.name,p.content_type AS type FROM photos p JOIN assets a ON a.id=p.asset_id WHERE a.deleted_at IS NULL ORDER BY p.created_at",
+      `SELECT p.id, p.asset_id, p.name, p.content_type AS type, p.is_main AS "isMain"
+     FROM photos p
+     JOIN assets a ON a.id = p.asset_id
+     WHERE a.deleted_at IS NULL
+     ORDER BY p.is_main DESC, p.created_at`,
     )
   ).rows;
 

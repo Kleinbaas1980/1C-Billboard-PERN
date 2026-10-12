@@ -1,10 +1,12 @@
-import type { Request, Response } from "express";
+import { NextFunction, type Request, type Response } from "express";
 import { pool, transaction } from "../configs/database.js";
 import { listAssets } from "../models/asset.model.js";
 import { assetSchema, ratingSchema } from "../utils/validation.js";
 import { HttpError } from "../utils/errors.js";
 import { assetRegisterXlsx } from "../utils/asset-register-export.js";
 import { env } from "../configs/env.js";
+import { get } from "@vercel/blob";
+import { Readable } from "node:stream";
 
 export async function list(_req: Request, res: Response) {
   res.json(await listAssets());
@@ -15,11 +17,47 @@ export async function publicAsset(req: Request, res: Response) {
   if (!/^[A-Z0-9-]{1,40}$/.test(id))
     throw new HttpError(404, "Asset not found.");
   const { rows } = await pool.query(
-    "SELECT id,company,advertiser FROM assets WHERE id=$1 AND deleted_at IS NULL",
+    `SELECT a.id, a.company, a.advertiser,
+          EXISTS (SELECT 1 FROM photos p WHERE p.asset_id = a.id AND p.is_main) AS "hasMainImage"
+   FROM assets a WHERE a.id = $1 AND a.deleted_at IS NULL`,
     [id],
   );
   if (!rows[0]) throw new HttpError(404, "Asset unavailable.");
   res.json(rows[0]);
+}
+
+export async function publicMainImage(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const id = String(req.params.id);
+  if (!/^[A-Z0-9-]{1,40}$/.test(id))
+    throw new HttpError(404, "Image unavailable.");
+
+  const p = (
+    await pool.query(
+      "SELECT p.blob_path FROM photos p JOIN assets a ON a.id=p.asset_id WHERE p.asset_id=$1 AND p.is_main AND a.deleted_at IS NULL",
+      [id],
+    )
+  ).rows[0];
+  if (!p) throw new HttpError(404, "Image unavailable.");
+
+  const blob = await get(p.blob_path, {
+    access: "private",
+    token: env.BLOB_READ_WRITE_TOKEN,
+  });
+  if (!blob || blob.statusCode !== 200)
+    throw new HttpError(404, "Image unavailable.");
+
+  res.set({
+    "Content-Type": "image/jpeg",
+    "Cache-Control": "public, max-age=300",
+    "X-Content-Type-Options": "nosniff",
+  });
+  Readable.fromWeb(blob.stream as import("node:stream/web").ReadableStream)
+    .on("error", next)
+    .pipe(res);
 }
 
 export async function save(req: Request, res: Response) {

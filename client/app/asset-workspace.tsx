@@ -8,9 +8,6 @@ import {
   ScanLine,
   MapPin,
   CalendarDays,
-  Camera,
-  Printer,
-  Download,
   X,
   Search,
   Building2,
@@ -24,7 +21,7 @@ import {
   Users,
   Home,
 } from "lucide-react";
-import QRCode from "qrcode";
+
 import ReportSelector from "./report/report-selector";
 import DeletionApprovals, { RequestDeletion } from "./deletion-controls";
 import { BrowserQRCodeReader } from "@zxing/browser";
@@ -34,7 +31,11 @@ import {
   maintenanceTypes,
   isUrgent,
 } from "../lib/ratings";
-type Asset = {
+import { Label } from "@/components/GenerateQr";
+import { AssetRatings } from "@/components/AssetRating";
+import MainImageUpload from "./main-image-upload";
+
+export type Asset = {
   id: string;
   location: string;
   company: string;
@@ -51,6 +52,7 @@ type Asset = {
   maintenanceType: string;
   photos: any[];
 };
+
 const blank = (): Asset => ({
   id: "",
   location: "",
@@ -68,8 +70,10 @@ const blank = (): Asset => ({
   maintenanceType: "Not specified",
   photos: [],
 });
+
 const today = () =>
   new Date().toLocaleDateString("en-CA", { timeZone: "Africa/Johannesburg" });
+
 function status(a: Asset) {
   if (!a.next) return "Not scheduled";
   if (a.next < today()) return "Overdue";
@@ -77,169 +81,14 @@ function status(a: Asset) {
     return "Due soon";
   return "Scheduled";
 }
-function Label({ asset }: { asset: Asset }) {
-  const [qr, setQr] = useState("");
-  const [qrError, setQrError] = useState("");
-  useEffect(() => {
-    setQr("");
-    setQrError("");
-    QRCode.toDataURL(
-      location.origin + "/qr?asset=" + encodeURIComponent(asset.id),
-      { width: 900, margin: 4, errorCorrectionLevel: "M" },
-    )
-      .then(setQr)
-      .catch(() =>
-        setQrError(
-          "Unable to generate the QR code. Reopen this label to try again.",
-        ),
-      );
-  }, [asset.id]);
-  function download() {
-    const a = document.createElement("a");
-    a.href = qr;
-    a.download = asset.id + "-QR.png";
-    a.click();
-  }
-  return (
-    <>
-      <div className="label qr-label" id="print-label">
-        <img className="label-logo" src="/1c-logo.png" alt="1C" />
-        <strong>{asset.company}</strong>
-        {qrError && <p role="alert">{qrError}</p>}
-        {qr ? (
-          <img className="asset-qr" src={qr} alt={"QR code for " + asset.id} />
-        ) : (
-          !qrError && <p>Generating QR code…</p>
-        )}
-        <b className="label-asset-id">{asset.id}</b>
-        <p>{asset.location}</p>
-        <small>
-          Scan to confirm this board and view its maintenance record
-        </small>
-      </div>
-      <div className="actions no-print">
-        <button disabled={!qr} onClick={() => window.print()}>
-          <Printer size={17} />
-          Print QR label
-        </button>
-        <button disabled={!qr} onClick={download}>
-          <Download size={17} />
-          Download QR code
-        </button>
-      </div>
-    </>
-  );
-}
-function AssetRatings({
-  asset,
-  onSaved,
-}: {
-  asset: Asset;
-  onSaved: (id: string) => Promise<void>;
-}) {
-  const [condition, setCondition] = useState(asset.condition),
-    [priority, setPriority] = useState(asset.priority),
-    [saving, setSaving] = useState(false),
-    [message, setMessage] = useState(""),
-    [failed, setFailed] = useState(false);
-  useEffect(() => {
-    setCondition(asset.condition);
-    setPriority(asset.priority);
-    setMessage("");
-  }, [asset.id, asset.condition, asset.priority]);
-  async function saveRatings(e: React.FormEvent) {
-    e.preventDefault();
-    setSaving(true);
-    setMessage("");
-    setFailed(false);
-    try {
-      const r = await apiRequest("/api/assets", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: asset.id, condition, priority }),
-      });
-      const d: any = await r.json();
-      if (!r.ok) throw Error(d.error);
-      await onSaved(asset.id);
-      setMessage("Condition and priority saved. Dashboard updated.");
-    } catch (e: any) {
-      setFailed(true);
-      setMessage(e.message);
-    } finally {
-      setSaving(false);
-    }
-  }
-  return (
-    <section className="asset-condition no-print">
-      <div>
-        <h3>Board assessment</h3>
-        <p>Record the condition and maintenance priority for this board.</p>
-      </div>
-      <form onSubmit={saveRatings}>
-        <label>
-          Condition rating
-          <select
-            className={
-              "rating-select condition-" + condition.replaceAll(" ", "-")
-            }
-            value={condition}
-            disabled={saving}
-            onChange={(e) => {
-              setCondition(e.target.value);
-              setMessage("");
-            }}
-          >
-            {conditions.map((c) => (
-              <option key={c}>{c}</option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Priority rating
-          <select
-            className={
-              "rating-select priority-" +
-              (priority.startsWith("P") ? priority.slice(0, 2) : "none")
-            }
-            value={priority}
-            disabled={saving}
-            onChange={(e) => {
-              setPriority(e.target.value);
-              setMessage("");
-            }}
-          >
-            {priorities.map((c) => (
-              <option key={c}>{c}</option>
-            ))}
-          </select>
-        </label>
-        <button
-          className="primary"
-          disabled={
-            saving ||
-            (condition === asset.condition && priority === asset.priority)
-          }
-        >
-          {saving ? "Saving…" : "Save ratings"}
-        </button>
-      </form>
-      {message && (
-        <p
-          className={failed ? "rating-error" : "rating-success"}
-          role={failed ? "alert" : "status"}
-        >
-          {message}
-        </p>
-      )}
-    </section>
-  );
-}
+
 export default function App({
   user,
 }: {
   user: { name: string; email: string; role: string };
 }) {
   const [view, setView] = useState("dashboard");
+
   const [assets, setAssets] = useState<Asset[]>([]),
     [selected, setSelected] = useState<Asset | null>(null),
     [edit, setEdit] = useState<Asset | null>(null),
@@ -253,7 +102,9 @@ export default function App({
     [scan, setScan] = useState(false),
     [scanText, setScanText] = useState(""),
     [scanError, setScanError] = useState("");
+
   const video = useRef<HTMLVideoElement>(null);
+
   async function load(focus?: string) {
     const r = await apiRequest("/api/assets");
     const raw: any = await r.json();
@@ -274,6 +125,7 @@ export default function App({
     }
     setLoading(false);
   }
+
   useEffect(() => {
     load().catch((e) => {
       setError(e.message);
@@ -285,6 +137,7 @@ export default function App({
     window.addEventListener("assets-updated", refresh);
     return () => window.removeEventListener("assets-updated", refresh);
   }, []);
+
   function open(a: Asset) {
     setSelected(a);
     setEdit(null);
@@ -295,6 +148,7 @@ export default function App({
       "/workspace?asset=" + encodeURIComponent(a.id),
     );
   }
+
   function find(raw: string) {
     let id = raw.trim();
     try {
@@ -317,6 +171,7 @@ export default function App({
         "No asset matches this QR code. Check the number or register the asset.",
       );
   }
+
   useEffect(() => {
     if (!scan || !video.current) return;
     let controls: any;
@@ -341,6 +196,7 @@ export default function App({
       controls?.stop();
     };
   }, [scan, assets]);
+
   async function save(e: React.FormEvent) {
     e.preventDefault();
     if (!edit) return;
@@ -397,6 +253,7 @@ export default function App({
       { enableHighAccuracy: true, timeout: 15000 },
     );
   }
+
   const shown = assets.filter(
     (a) =>
       [a.id, a.location, a.company, a.advertiser]
@@ -406,6 +263,7 @@ export default function App({
       (filter === "All assets" ||
         (filter === "Urgent" ? isUrgent(a) : status(a) === filter)),
   );
+
   const urgent = assets.filter(isUrgent);
   const overdue = assets.filter((a) => status(a) === "Overdue").length,
     due = assets.filter((a) => status(a) === "Due soon").length;
@@ -815,6 +673,24 @@ export default function App({
                   </h2>
                   <p>{selected.location}</p>
                 </div>
+                {(() => {
+                  const main = selected.photos.find(
+                    (p) => p.isMain ?? p.is_main,
+                  );
+                  return main ? (
+                    <img
+                      src={"/api/photos/" + main.id}
+                      alt={"Main image of " + selected.id}
+                      style={{
+                        width: "30%",
+                        maxHeight: 320,
+                        objectFit: "contain",
+                        borderRadius: 8,
+                        margin: 10,
+                      }}
+                    />
+                  ) : null;
+                })()}
                 <div className="asset-header-actions">
                   <a
                     className="button"
@@ -833,6 +709,7 @@ export default function App({
                   </button>
                 </div>
               </div>
+
               {user.role === "assessor" && (
                 <RequestDeletion key={selected.id} assetId={selected.id} />
               )}
@@ -886,6 +763,14 @@ export default function App({
               )}
               {tab === "photos" && (
                 <div className="photo-section no-print">
+                  {user.role === "admin" && (
+                    <MainImageUpload
+                      asset={selected.id}
+                      onUploaded={async () => {
+                        await load(selected.id);
+                      }}
+                    />
+                  )}
                   <PhotoUploadGate
                     asset={selected.id}
                     onUploaded={async () => {
@@ -904,29 +789,35 @@ export default function App({
                         </a>
                         <figcaption>
                           {p.name}
-                          <button
-                            disabled={busy}
-                            onClick={async () => {
-                              if (!confirm("Remove this photo?")) return;
-                              setBusy(true);
-                              try {
-                                const r = await apiRequest(
-                                  "/api/photos/" + p.id,
-                                  { method: "DELETE" },
-                                );
-                                if (!r.ok)
-                                  throw Error("Unable to remove photo");
-                                await load(selected.id);
-                              } catch (e: any) {
-                                setError(e.message);
-                              } finally {
-                                setBusy(false);
-                              }
-                            }}
-                            aria-label="Remove photo"
-                          >
-                            <X size={16} />
-                          </button>
+                          {(p.isMain ?? p.is_main) && (
+                            <span className="badge">Main</span>
+                          )}
+                          {(user.role === "admin" ||
+                            !(p.isMain ?? p.is_main)) && (
+                            <button
+                              disabled={busy}
+                              onClick={async () => {
+                                if (!confirm("Remove this photo?")) return;
+                                setBusy(true);
+                                try {
+                                  const r = await apiRequest(
+                                    "/api/photos/" + p.id,
+                                    { method: "DELETE" },
+                                  );
+                                  if (!r.ok)
+                                    throw Error("Unable to remove photo");
+                                  await load(selected.id);
+                                } catch (e: any) {
+                                  setError(e.message);
+                                } finally {
+                                  setBusy(false);
+                                }
+                              }}
+                              aria-label="Remove photo"
+                            >
+                              <X size={16} />
+                            </button>
+                          )}
                         </figcaption>
                       </figure>
                     ))}
