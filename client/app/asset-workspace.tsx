@@ -34,11 +34,13 @@ import {
 import { Label } from "@/components/GenerateQr";
 import { AssetRatings } from "@/components/AssetRating";
 import MainImageUpload from "./main-image-upload";
+import { COMPANIES, elementsFor } from "@/lib/register-form";
 
 export type Asset = {
   id: string;
   location: string;
   company: string;
+  element?: string;
   advertiser: string;
   contact: string;
   email: string;
@@ -56,7 +58,8 @@ export type Asset = {
 const blank = (): Asset => ({
   id: "",
   location: "",
-  company: "1Crew1Project",
+  company: "",
+  element: "",
   advertiser: "",
   contact: "",
   email: "",
@@ -111,6 +114,7 @@ export default function App({
     if (!r.ok) throw Error(raw.error);
     const data: Asset[] = raw.map((a: any) => ({
       ...a,
+      element: a.element || "",
       condition: a.condition || "Not assessed",
       priority: a.priority || "Not assigned",
       maintenanceType: a.maintenanceType || "Not specified",
@@ -530,11 +534,10 @@ export default function App({
             !edit && <DeletionApprovals />}
           {edit ? (
             <section className="panel no-print">
+              {/* ______________________________Register Asset Form__________________________  */}
               <div className="panel-title">
                 <h2>
-                  {creating
-                    ? "Register a billboard"
-                    : "Edit asset · " + edit.id}
+                  {creating ? "Register a Asset" : "Edit asset · " + edit.id}
                 </h2>
                 <button onClick={() => setEdit(null)} aria-label="Close form">
                   <X />
@@ -542,9 +545,55 @@ export default function App({
               </div>
               <form onSubmit={save}>
                 <div className="form-grid">
+                  <label>
+                    Company *
+                    <select
+                      required
+                      value={edit.company}
+                      onChange={(e) =>
+                        // reset element, otherwise a stale value from the previous company survives
+                        setEdit({
+                          ...edit,
+                          company: e.target.value,
+                          element: "",
+                        })
+                      }
+                    >
+                      <option value="">Select a company…</option>
+                      {/* keeps old records (e.g. "1Crew1Project") editable instead of blanking them */}
+                      {edit.company &&
+                        !COMPANIES.includes(edit.company as any) && (
+                          <option value={edit.company}>{edit.company}</option>
+                        )}
+                      {COMPANIES.map((c) => (
+                        <option key={c} value={c}>
+                          {c}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  {elementsFor(edit.company).length > 0 && (
+                    <label>
+                      Element being assessed *
+                      <select
+                        required
+                        value={edit.element}
+                        onChange={(e) =>
+                          setEdit({ ...edit, element: e.target.value })
+                        }
+                      >
+                        <option value="">Select an element…</option>
+                        {elementsFor(edit.company).map((el) => (
+                          <option key={el} value={el}>
+                            {el}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  )}
                   {[
                     ["id", "Asset number", "e.g. BB-0001"],
-                    ["company", "Company name", "Asset owner"],
                     ["location", "Site location", "Street, suburb, city"],
                     ["advertiser", "Advertiser / brand", "Advertiser company"],
                     ["contact", "Advertiser contact person", "Full name"],
@@ -644,6 +693,7 @@ export default function App({
                   </button>
                 </div>
               </form>
+              {/* _______________________________________________________________________________________________ */}
             </section>
           ) : selected ? (
             <section className="panel">
@@ -738,6 +788,7 @@ export default function App({
                 <div className="detail-grid no-print">
                   {[
                     ["Company", selected.company],
+                    ["Element", selected.element],
                     ["Location", selected.location],
                     ["Advertiser", selected.advertiser],
                     ["Contact person", selected.contact],

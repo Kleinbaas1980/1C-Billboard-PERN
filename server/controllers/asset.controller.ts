@@ -79,15 +79,16 @@ export async function save(req: Request, res: Response) {
       a.priority,
       a.maintenanceType,
       req.user!.id,
+      a.element,
     ];
     if (a.mode === "create") {
       await c.query(
-        "INSERT INTO assets(id,location,company,advertiser,contact,email,phone,gps,last_maintenance,next_maintenance,comments,condition,priority,maintenance_type,assessed_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)",
+        "INSERT INTO assets(id,location,company,advertiser,contact,email,phone,gps,last_maintenance,next_maintenance,comments,condition,priority,maintenance_type,assessed_by, element) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15, $16)",
         values,
       );
     } else {
       const r = await c.query(
-        "UPDATE assets SET location=$2,company=$3,advertiser=$4,contact=$5,email=$6,phone=$7,gps=$8,last_maintenance=$9,next_maintenance=$10,comments=$11,condition=$12,priority=$13,maintenance_type=$14,assessed_by=$15,updated_at=now() WHERE id=$1 AND deleted_at IS NULL",
+        "UPDATE assets SET location=$2,company=$3,advertiser=$4,contact=$5,email=$6,phone=$7,gps=$8,last_maintenance=$9,next_maintenance=$10,comments=$11,condition=$12,priority=$13,maintenance_type=$14,assessed_by=$15, element=$16,updated_at=now() WHERE id=$1 AND deleted_at IS NULL",
         values,
       );
       if (!r.rowCount) throw new HttpError(404, "Asset unavailable.");

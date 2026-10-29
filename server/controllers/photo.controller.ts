@@ -261,6 +261,7 @@ export async function mainImage(req: Request, res: Response) {
         "UPDATE photos SET is_main=false WHERE asset_id=$1 AND is_main",
         [asset],
       );
+
       await c.query(
         "INSERT INTO photos(id,asset_id,name,blob_url,blob_path,content_type,size_bytes,uploaded_by,is_main) VALUES($1,$2,$3,$4,$5,$6,$7,$8,true)",
         [
@@ -274,6 +275,7 @@ export async function mainImage(req: Request, res: Response) {
           req.user!.id,
         ],
       );
+
       await c.query(
         "INSERT INTO audit_logs(actor_id,action,entity_id) VALUES($1,$2,$3)",
         [req.user!.id, "photo.main_set", asset],

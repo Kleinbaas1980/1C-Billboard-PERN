@@ -18,9 +18,11 @@ export const emailSchema = z
   .transform((v) => v.trim().toLowerCase());
 const optionalText = z.string().max(500).default("");
 const date = z.union([z.literal(""), z.iso.date()]).default("");
+
 export const assetSchema = z.object({
   id: z.string().regex(/^[A-Z0-9-]{1,40}$/),
   location: z.string().trim().min(1).max(500),
+  element: optionalText,
   company: z.string().trim().min(1).max(500),
   advertiser: optionalText,
   contact: optionalText,
@@ -39,6 +41,7 @@ export const assetSchema = z.object({
     .default("Not specified"),
   mode: z.enum(["create", "edit"]),
 });
+
 export const ratingSchema = z.object({
   id: z.string().regex(/^[A-Z0-9-]{1,40}$/),
   condition: z.enum(conditions as [string, ...string[]]),
