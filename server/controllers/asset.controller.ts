@@ -17,7 +17,7 @@ export async function publicAsset(req: Request, res: Response) {
   if (!/^[A-Z0-9-]{1,40}$/.test(id))
     throw new HttpError(404, "Asset not found.");
   const { rows } = await pool.query(
-    `SELECT a.id, a.company, a.advertiser,
+    `SELECT a.id, a.company, a.advertiser, a.next_maintenance,
           EXISTS (SELECT 1 FROM photos p WHERE p.asset_id = a.id AND p.is_main) AS "hasMainImage"
    FROM assets a WHERE a.id = $1 AND a.deleted_at IS NULL`,
     [id],

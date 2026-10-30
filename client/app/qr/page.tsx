@@ -8,13 +8,14 @@ export default function QRPage() {
   const [row, setRow] = useState<{
       id: string;
       company: string;
-      next_maintenance: string;
       advertiser: string;
+      next_maintenance: string;
       hasMainImage: boolean;
     } | null>(null),
     [loading, setLoading] = useState(true);
   useEffect(() => {
     const id = new URLSearchParams(window.location.search).get("asset") || "";
+
     api
       .get("/public/assets/" + encodeURIComponent(id))
       .then((r) => setRow(r.data))

@@ -7,6 +7,7 @@ import { isUrgent } from "@/lib/ratings";
 import PrintControls from "./print-controls";
 import ReportSelector from "./report-selector";
 import PortfolioCharts from "./portfolio-charts";
+
 export default function ReportPage() {
   return (
     <RequireAuth>
@@ -14,6 +15,7 @@ export default function ReportPage() {
     </RequireAuth>
   );
 }
+
 function Report() {
   const { user } = useAuth();
   const [allAssets, setAllAssets] = useState<any[]>([]),
