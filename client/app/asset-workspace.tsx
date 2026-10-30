@@ -1,11 +1,9 @@
 "use client";
 import { downloadRegister } from "@/services/assets";
 import { apiRequest } from "@/services/http";
-import PhotoUploadGate from "./photo-upload-gate";
 import { useEffect, useRef, useState } from "react";
 import {
   Plus,
-  ScanLine,
   MapPin,
   CalendarDays,
   X,
@@ -13,12 +11,8 @@ import {
   Building2,
   QrCode,
   AlertTriangle,
-  ClipboardList,
   ChevronRight,
-  LayoutDashboard,
   FileText,
-  Users,
-  Home,
 } from "lucide-react";
 
 import ReportSelector from "./report/report-selector";
@@ -30,11 +24,14 @@ import {
   maintenanceTypes,
   isUrgent,
 } from "../lib/ratings";
-import { Label } from "@/components/GenerateQr";
 import { AssetRatings } from "@/components/AssetRating";
-import MainImageUpload from "./main-image-upload";
 import { elementsFor } from "@/lib/register-form";
 import RegisterAssetForm from "@/components/RegisterAssetForm";
+import Sidebar from "@/components/Sidebar";
+import Header from "@/components/Header";
+import Tabs from "@/components/Tabs";
+import MobileNav from "@/components/MobileNav";
+import PageHeader from "@/components/PageHeader";
 
 export type Asset = {
   id: string;
@@ -280,151 +277,37 @@ export default function App({
   const urgent = assets.filter(isUrgent);
   const overdue = assets.filter((a) => status(a) === "Overdue").length,
     due = assets.filter((a) => status(a) === "Due soon").length;
+
   return (
     <div className="app">
-      <aside className="sidebar no-print">
-        <div className="brand">
-          <img src="/1c-logo.png" alt="1C" />
-        </div>
-        <div className="division">OUTDOOR ADVERTISING</div>
-        <button
-          className={"nav " + (view === "dashboard" ? "active" : "")}
-          onClick={() => {
-            setView("dashboard");
-            setSelected(null);
-            setEdit(null);
-            history.replaceState(null, "", "/workspace");
-          }}
-        >
-          <LayoutDashboard size={20} />
-          Dashboard
-        </button>
-        <button
-          className={"nav " + (view === "register" ? "active" : "")}
-          onClick={() => {
-            setView("register");
-            setSelected(null);
-            setEdit(null);
-            history.replaceState(null, "", "/workspace");
-          }}
-        >
-          <ClipboardList size={20} />
-          Asset register
-        </button>
-        <a className="nav" href="/report">
-          <FileText size={20} />
-          All assets summary
-        </a>
-        {user.role === "admin" && (
-          <a className="nav" href="/admin">
-            <Users size={20} />
-            Manage assessors
-          </a>
-        )}
-        <button
-          className="nav"
-          onClick={() => {
-            setScan(true);
-            setScanError("");
-          }}
-        >
-          <ScanLine size={20} />
-          Scan an asset
-        </button>
-        <div className="side-note">
-          <QrCode size={32} />
-          <b>Every asset. One record.</b>
-          <p>
-            Register on site, attach a label and keep maintenance up to date.
-          </p>
-        </div>
-        <footer>
-          <b>{user.name}</b>
-          <br />
-          {user.role === "admin" ? "Admin" : "Assessor"}
-          <br />
-          <a href="/login">Account / sign out</a>
-        </footer>
-      </aside>
+      <Sidebar
+        view={view}
+        setView={setView}
+        setSelected={setSelected}
+        setEdit={setEdit}
+        user={user}
+        setScan={setScan}
+        setScanError={setScanError}
+      />
       <main>
-        <header className="topbar no-print">
-          <span>
-            ASSET MANAGEMENT <span className="slash">/</span> BILLBOARDS
-          </span>
-          <div className="topbar-actions">
-            <a className="button" href="/">
-              <Home size={18} />
-              Home
-            </a>
-            <button onClick={() => setScan(true)}>
-              <ScanLine size={18} />
-              Scan QR code
-            </button>
-          </div>
-        </header>
+        <Header setScan={setScan} />
         <div className="workspace">
-          <div className="mobile-nav no-print">
-            <button
-              onClick={() => {
-                setView("dashboard");
-                setSelected(null);
-                setEdit(null);
-              }}
-            >
-              Dashboard
-            </button>
-            <button
-              onClick={() => {
-                setView("register");
-                setSelected(null);
-                setEdit(null);
-              }}
-            >
-              Assets
-            </button>
-            <a className="button" href="/report">
-              Report
-            </a>
-            {user.role === "admin" && (
-              <a className="button" href="/admin">
-                Team
-              </a>
-            )}
-            <a className="button" href="/login">
-              Account
-            </a>
-          </div>
-          <div className="page-heading no-print">
-            <div>
-              <div className="eyebrow">YOUR BILLBOARD PORTFOLIO</div>
-              <h1>
-                {view === "dashboard" ? "Dashboard" : "Asset register"}
-                <span>.</span>
-              </h1>
-              <p>Site records, advertisers and maintenance in one place.</p>
-            </div>
-            {user.role === "admin" && (
-              <button
-                onClick={() =>
-                  downloadRegister().catch((e) => setError(e.message))
-                }
-              >
-                Download Excel register
-              </button>
-            )}
-            <button
-              className="primary"
-              onClick={() => {
-                setCreating(true);
-                setEdit(blank());
-                setSelected(null);
-                setError("");
-              }}
-            >
-              <Plus size={20} />
-              Register asset
-            </button>
-          </div>
+          <MobileNav
+            setView={setView}
+            setSelected={setSelected}
+            setEdit={setEdit}
+            user={user}
+          />
+          <PageHeader
+            view={view}
+            user={user}
+            downloadRegister={downloadRegister}
+            setCreating={setCreating}
+            setEdit={setEdit}
+            blank={blank}
+            setSelected={setSelected}
+            setError={setError}
+          />
           {!selected && !edit && (
             <div className="dashboard-reports no-print">
               <a className="button primary" href="/report">
@@ -628,125 +511,16 @@ export default function App({
                   await load(id);
                 }}
               />
-              <div className="tabs no-print">
-                {["details", "photos", "qr"].map((t) => (
-                  <button
-                    className={tab === t ? "chosen" : ""}
-                    key={t}
-                    onClick={() => setTab(t)}
-                  >
-                    {t === "qr"
-                      ? "QR code & label"
-                      : t === "photos"
-                        ? "Site photos"
-                        : "Asset details"}
-                  </button>
-                ))}
-              </div>
-              {tab === "details" && (
-                <div className="detail-grid no-print">
-                  {[
-                    ["Company", selected.company],
-                    ["Element", selected.element],
-                    ...(selected.element === "TV"
-                      ? [["Tv Serial number", selected.serial_number]]
-                      : []),
-                    ["Location", selected.location],
-                    ["Advertiser", selected.advertiser],
-                    ["Contact person", selected.contact],
-                    ["Email", selected.email],
-                    ["Phone", selected.phone],
-                    ["Last maintenance", selected.last],
-                    ["Next maintenance due", selected.next],
-                    ["GPS coordinates", selected.gps],
-                    ["Condition rating", selected.condition],
-                    ["Priority rating", selected.priority],
-                    ["Type of maintenance", selected.maintenanceType],
-                  ].map(([k, v]) => (
-                    <div key={k}>
-                      <span>{k}</span>
-                      <strong>{v || "Not recorded"}</strong>
-                    </div>
-                  ))}
-                  <div className="full comments">
-                    <span>General comments</span>
-                    <p>{selected.comments || "No comments recorded."}</p>
-                  </div>
-                </div>
-              )}
-              {tab === "photos" && (
-                <div className="photo-section no-print">
-                  {user.role === "admin" && (
-                    <MainImageUpload
-                      asset={selected.id}
-                      onUploaded={async () => {
-                        await load(selected.id);
-                      }}
-                    />
-                  )}
-                  <PhotoUploadGate
-                    asset={selected.id}
-                    onUploaded={async () => {
-                      await load(selected.id);
-                    }}
-                  />
-                  <div className="photo-grid">
-                    {selected.photos.map((p) => (
-                      <figure key={p.id}>
-                        <a
-                          href={"/api/photos/" + p.id}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          <img src={"/api/photos/" + p.id} alt={p.name} />
-                        </a>
-                        <figcaption>
-                          {p.name}
-                          {(p.isMain ?? p.is_main) && (
-                            <span className="badge">Main</span>
-                          )}
-                          {(user.role === "admin" ||
-                            !(p.isMain ?? p.is_main)) && (
-                            <button
-                              disabled={busy}
-                              onClick={async () => {
-                                if (!confirm("Remove this photo?")) return;
-                                setBusy(true);
-                                try {
-                                  const r = await apiRequest(
-                                    "/api/photos/" + p.id,
-                                    { method: "DELETE" },
-                                  );
-                                  if (!r.ok)
-                                    throw Error("Unable to remove photo");
-                                  await load(selected.id);
-                                } catch (e: any) {
-                                  setError(e.message);
-                                } finally {
-                                  setBusy(false);
-                                }
-                              }}
-                              aria-label="Remove photo"
-                            >
-                              <X size={16} />
-                            </button>
-                          )}
-                        </figcaption>
-                      </figure>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {tab === "qr" && (
-                <div className="barcode-section">
-                  <p className="no-print">
-                    Print and attach this label to the billboard. Scan the QR
-                    code to open this board’s separate asset card. Photo uploads
-                    require assessor sign-in and an upload password.
-                  </p>
-                  <Label asset={selected} />
-                </div>
-              )}
+              <Tabs
+                tab={tab}
+                setTab={setTab}
+                selected={selected}
+                user={user}
+                load={load}
+                busy={busy}
+                setBusy={setBusy}
+                setError={setError}
+              />
             </section>
           ) : (
             <section className="panel register no-print">
