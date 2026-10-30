@@ -13,6 +13,7 @@ export default function QRPage() {
       hasMainImage: boolean;
     } | null>(null),
     [loading, setLoading] = useState(true);
+
   useEffect(() => {
     const id = new URLSearchParams(window.location.search).get("asset") || "";
 
@@ -22,6 +23,9 @@ export default function QRPage() {
       .catch(() => setRow(null))
       .finally(() => setLoading(false));
   }, []);
+
+  const StringDate = row?.next_maintenance.split("T")[0];
+
   return (
     <main className="qr-public-page">
       <section className="qr-public-card">
@@ -60,8 +64,8 @@ export default function QRPage() {
                 <dd>{row.advertiser || "Not recorded"}</dd>
               </div>
               <div>
-                <dt>Due Date</dt>
-                <dd>{row.next_maintenance || "Not recorded"}</dd>
+                <dt>Next Maintenance Date</dt>
+                <dd>{StringDate || "Not recorded"}</dd>
               </div>
             </dl>
             {user ? (
