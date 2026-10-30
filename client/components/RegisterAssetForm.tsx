@@ -1,7 +1,7 @@
 import { Asset } from "@/app/asset-workspace";
 import { COMPANIES } from "@/lib/register-form";
 import { LocateFixed, X } from "lucide-react";
-import React, { SetStateAction } from "react";
+import React, { SetStateAction, useRef } from "react";
 
 interface RegisterForm {
   creating: boolean;
@@ -28,6 +28,7 @@ export default function RegisterAssetForm({
   maintenanceTypes,
   busy,
 }: RegisterForm) {
+  const isTv = edit.element === "TV";
   return (
     <section className="panel no-print">
       {/* ______________________________Register Asset Form__________________________  */}
@@ -67,29 +68,50 @@ export default function RegisterAssetForm({
           </label>
 
           {elementsFor(edit.company).length > 0 && (
+            <>
+              {" "}
+              <label>
+                Element being assessed *
+                <select
+                  required
+                  value={edit.element}
+                  onChange={(e) =>
+                    setEdit({ ...edit, element: e.target.value })
+                  }
+                >
+                  <option value="">Select an element…</option>
+                  {elementsFor(edit.company).map((el) => (
+                    <option key={el} value={el}>
+                      {el}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </>
+          )}
+
+          {isTv && (
             <label>
-              Element being assessed *
-              <select
+              TV serial number *
+              <input
                 required
-                value={edit.element}
-                onChange={(e) => setEdit({ ...edit, element: e.target.value })}
-              >
-                <option value="">Select an element…</option>
-                {elementsFor(edit.company).map((el) => (
-                  <option key={el} value={el}>
-                    {el}
-                  </option>
-                ))}
-              </select>
+                value={edit.serial_number ?? ""}
+                placeholder="Serial number"
+                maxLength={100}
+                onChange={(e) =>
+                  setEdit({ ...edit, serial_number: e.target.value })
+                }
+              />
             </label>
           )}
+
           {[
             ["id", "Asset number", "e.g. BB-0001"],
             ["location", "Site location", "Street, suburb, city"],
             ["advertiser", "Advertiser / brand", "Advertiser company"],
-            ["contact", "Advertiser contact person", "Full name"],
-            ["email", "Advertiser email", "name@company.co.za"],
-            ["phone", "Advertiser phone", "Contact number"],
+            ["contact", "Contact person", "Full name"],
+            ["email", "Contact email", "name@company.co.za"],
+            ["phone", "Phone", "Contact number"],
             ["last", "Last maintenance date", ""],
             ["next", "Next maintenance due", ""],
           ].map(([key, label, placeholder]) => (

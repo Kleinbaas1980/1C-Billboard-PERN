@@ -234,6 +234,9 @@ function Report() {
             {[
               ["Company", a.company],
               ["Element", a.element],
+              ...(a.element === "TV"
+                ? [["TV Serial number", a.serial_number]]
+                : []),
               ["Location", a.location],
               ["GPS coordinates", a.gps],
               ["Advertiser", a.advertiser],

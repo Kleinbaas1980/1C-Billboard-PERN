@@ -11,7 +11,6 @@ import {
   X,
   Search,
   Building2,
-  LocateFixed,
   QrCode,
   AlertTriangle,
   ClipboardList,
@@ -34,7 +33,7 @@ import {
 import { Label } from "@/components/GenerateQr";
 import { AssetRatings } from "@/components/AssetRating";
 import MainImageUpload from "./main-image-upload";
-import { COMPANIES, elementsFor } from "@/lib/register-form";
+import { elementsFor } from "@/lib/register-form";
 import RegisterAssetForm from "@/components/RegisterAssetForm";
 
 export type Asset = {
@@ -42,6 +41,7 @@ export type Asset = {
   location: string;
   company: string;
   element?: string;
+  serial_number?: string;
   advertiser: string;
   contact: string;
   email: string;
@@ -61,6 +61,7 @@ const blank = (): Asset => ({
   location: "",
   company: "",
   element: "",
+  serial_number: "",
   advertiser: "",
   contact: "",
   email: "",
@@ -120,6 +121,7 @@ export default function App({
       condition: a.condition || "Not assessed",
       priority: a.priority || "Not assigned",
       maintenanceType: a.maintenanceType || "Not specified",
+      serial_number: a.serial_number || "",
     }));
     setAssets(data);
     const id =
@@ -604,7 +606,7 @@ export default function App({
                     href={"/report?asset=" + encodeURIComponent(selected.id)}
                   >
                     <FileText size={17} />
-                    This asset summary report
+                    Print this asset summary report
                   </a>
                   <button
                     onClick={() => {
@@ -646,6 +648,9 @@ export default function App({
                   {[
                     ["Company", selected.company],
                     ["Element", selected.element],
+                    ...(selected.element === "TV"
+                      ? [["Tv Serial number", selected.serial_number]]
+                      : []),
                     ["Location", selected.location],
                     ["Advertiser", selected.advertiser],
                     ["Contact person", selected.contact],

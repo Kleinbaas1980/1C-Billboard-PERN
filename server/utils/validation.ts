@@ -23,6 +23,7 @@ export const assetSchema = z.object({
   id: z.string().regex(/^[A-Z0-9-]{1,40}$/),
   location: z.string().trim().min(1).max(500),
   element: optionalText,
+  serial_number: z.string().max(100).optional().default(""),
   company: z.string().trim().min(1).max(500),
   advertiser: optionalText,
   contact: optionalText,
