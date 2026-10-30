@@ -7,7 +7,10 @@ export const COMPANIES = [
 
 // Companies not listed here have no elements (for now)
 export const ELEMENTS_BY_COMPANY: Record<string, string[]> = {
-  "Golf Adds": ["Billboards", "TVs", "Ball washers", "Clocks"],
+  "Golf Adds": ["Billboard", "TV", "Ball washer", "Clock"],
+  "Outdoor Network": ["Billboard"],
+  Airport: ["Billboard"],
+  Digital: ["Billboard"],
 };
 
 export const elementsFor = (company: string) =>
