@@ -8,6 +8,7 @@ export default function QRPage() {
   const [row, setRow] = useState<{
       id: string;
       company: string;
+      next_maintenance: string;
       advertiser: string;
       hasMainImage: boolean;
     } | null>(null),
@@ -56,6 +57,10 @@ export default function QRPage() {
               <div>
                 <dt>Advertiser</dt>
                 <dd>{row.advertiser || "Not recorded"}</dd>
+              </div>
+              <div>
+                <dt>Due Date</dt>
+                <dd>{row.next_maintenance || "Not recorded"}</dd>
               </div>
             </dl>
             {user ? (

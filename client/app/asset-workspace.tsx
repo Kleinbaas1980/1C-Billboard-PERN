@@ -35,6 +35,7 @@ import { Label } from "@/components/GenerateQr";
 import { AssetRatings } from "@/components/AssetRating";
 import MainImageUpload from "./main-image-upload";
 import { COMPANIES, elementsFor } from "@/lib/register-form";
+import RegisterAssetForm from "@/components/RegisterAssetForm";
 
 export type Asset = {
   id: string;
@@ -99,6 +100,7 @@ export default function App({
     [tab, setTab] = useState("details"),
     [query, setQuery] = useState(""),
     [filter, setFilter] = useState("All assets"),
+    [companyFilter, setCompanyFilter] = useState("All companies"),
     [error, setError] = useState(""),
     [loading, setLoading] = useState(true),
     [busy, setBusy] = useState(false),
@@ -201,7 +203,7 @@ export default function App({
     };
   }, [scan, assets]);
 
-  async function save(e: React.FormEvent) {
+  async function save(e: React.SubmitEvent) {
     e.preventDefault();
     if (!edit) return;
     setBusy(true);
@@ -258,12 +260,17 @@ export default function App({
     );
   }
 
+  const companyOptions = Array.from(
+    new Set(assets.map((a) => a.company).filter(Boolean)),
+  ).sort();
+
   const shown = assets.filter(
     (a) =>
       [a.id, a.location, a.company, a.advertiser]
         .join(" ")
         .toLowerCase()
         .includes(query.toLowerCase()) &&
+      (companyFilter === "All companies" || a.company === companyFilter) &&
       (filter === "All assets" ||
         (filter === "Urgent" ? isUrgent(a) : status(a) === filter)),
   );
@@ -533,168 +540,18 @@ export default function App({
             !selected &&
             !edit && <DeletionApprovals />}
           {edit ? (
-            <section className="panel no-print">
-              {/* ______________________________Register Asset Form__________________________  */}
-              <div className="panel-title">
-                <h2>
-                  {creating ? "Register a Asset" : "Edit asset · " + edit.id}
-                </h2>
-                <button onClick={() => setEdit(null)} aria-label="Close form">
-                  <X />
-                </button>
-              </div>
-              <form onSubmit={save}>
-                <div className="form-grid">
-                  <label>
-                    Company *
-                    <select
-                      required
-                      value={edit.company}
-                      onChange={(e) =>
-                        // reset element, otherwise a stale value from the previous company survives
-                        setEdit({
-                          ...edit,
-                          company: e.target.value,
-                          element: "",
-                        })
-                      }
-                    >
-                      <option value="">Select a company…</option>
-                      {/* keeps old records (e.g. "1Crew1Project") editable instead of blanking them */}
-                      {edit.company &&
-                        !COMPANIES.includes(edit.company as any) && (
-                          <option value={edit.company}>{edit.company}</option>
-                        )}
-                      {COMPANIES.map((c) => (
-                        <option key={c} value={c}>
-                          {c}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-
-                  {elementsFor(edit.company).length > 0 && (
-                    <label>
-                      Element being assessed *
-                      <select
-                        required
-                        value={edit.element}
-                        onChange={(e) =>
-                          setEdit({ ...edit, element: e.target.value })
-                        }
-                      >
-                        <option value="">Select an element…</option>
-                        {elementsFor(edit.company).map((el) => (
-                          <option key={el} value={el}>
-                            {el}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                  )}
-                  {[
-                    ["id", "Asset number", "e.g. BB-0001"],
-                    ["location", "Site location", "Street, suburb, city"],
-                    ["advertiser", "Advertiser / brand", "Advertiser company"],
-                    ["contact", "Advertiser contact person", "Full name"],
-                    ["email", "Advertiser email", "name@company.co.za"],
-                    ["phone", "Advertiser phone", "Contact number"],
-                    ["last", "Last maintenance date", ""],
-                    ["next", "Next maintenance due", ""],
-                  ].map(([key, label, placeholder]) => (
-                    <label key={key}>
-                      {label}
-                      {["id", "company", "location"].includes(key) && " *"}
-                      <input
-                        required={["id", "company", "location"].includes(key)}
-                        disabled={key === "id" && !creating}
-                        maxLength={key === "id" ? 40 : 500}
-                        type={
-                          key === "email"
-                            ? "email"
-                            : ["last", "next"].includes(key)
-                              ? "date"
-                              : "text"
-                        }
-                        value={(edit as any)[key]}
-                        placeholder={placeholder}
-                        onChange={(e) =>
-                          setEdit({
-                            ...edit,
-                            [key]:
-                              key === "id"
-                                ? e.target.value.toUpperCase()
-                                : e.target.value,
-                          })
-                        }
-                      />
-                    </label>
-                  ))}
-                  <label>
-                    GPS coordinates
-                    <div className="input-action">
-                      <input
-                        value={edit.gps}
-                        placeholder="Latitude, longitude"
-                        onChange={(e) =>
-                          setEdit({ ...edit, gps: e.target.value })
-                        }
-                      />
-                      <button
-                        type="button"
-                        onClick={gps}
-                        title="Capture current GPS location"
-                      >
-                        <LocateFixed size={20} />
-                      </button>
-                    </div>
-                  </label>
-                  {[
-                    ["condition", "Condition rating", conditions],
-                    ["priority", "Priority rating", priorities],
-                    [
-                      "maintenanceType",
-                      "Type of maintenance",
-                      maintenanceTypes,
-                    ],
-                  ].map(([key, label, options]) => (
-                    <label key={key as string}>
-                      {label as string}
-                      <select
-                        value={(edit as any)[key as string]}
-                        onChange={(e) =>
-                          setEdit({ ...edit, [key as string]: e.target.value })
-                        }
-                      >
-                        {(options as string[]).map((o) => (
-                          <option key={o}>{o}</option>
-                        ))}
-                      </select>
-                    </label>
-                  ))}
-                  <label className="full">
-                    General comments
-                    <textarea
-                      rows={4}
-                      value={edit.comments}
-                      onChange={(e) =>
-                        setEdit({ ...edit, comments: e.target.value })
-                      }
-                      placeholder="Condition, work completed, access notes or maintenance requirements"
-                    />
-                  </label>
-                </div>
-                <div className="form-footer">
-                  <small>
-                    Save the asset to generate its QR code and add site photos.
-                  </small>
-                  <button className="primary" disabled={busy}>
-                    {busy ? "Saving…" : "Save asset"}
-                  </button>
-                </div>
-              </form>
-              {/* _______________________________________________________________________________________________ */}
-            </section>
+            <RegisterAssetForm
+              creating={creating}
+              edit={edit}
+              setEdit={setEdit}
+              save={save}
+              elementsFor={elementsFor}
+              gps={gps}
+              conditions={conditions}
+              priorities={priorities}
+              maintenanceTypes={maintenanceTypes}
+              busy={busy}
+            />
           ) : selected ? (
             <section className="panel">
               <div className="panel-title no-print">
@@ -890,7 +747,7 @@ export default function App({
             <section className="panel register no-print">
               <div className="register-toolbar">
                 <h2>
-                  Billboard assets <span>{assets.length}</span>
+                  Assets <span>{assets.length}</span>
                 </h2>
                 <div className="tools">
                   <div className="search">
@@ -901,6 +758,29 @@ export default function App({
                       onChange={(e) => setQuery(e.target.value)}
                     />
                   </div>
+                  <select
+                    value={companyFilter}
+                    onChange={(e) => setCompanyFilter(e.target.value)}
+                    aria-label="Filter by company"
+                  >
+                    <option>All companies</option>
+                    {companyOptions.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                  {companyFilter !== "All companies" && (
+                    <a
+                      className="button primary"
+                      href={
+                        "/report?company=" + encodeURIComponent(companyFilter)
+                      }
+                    >
+                      <FileText size={18} />
+                      Print all {companyFilter} reports ({shown.length})
+                    </a>
+                  )}
                   <select
                     value={filter}
                     onChange={(e) => setFilter(e.target.value)}

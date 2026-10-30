@@ -17,28 +17,44 @@ export default function ReportPage() {
 function Report() {
   const { user } = useAuth();
   const [allAssets, setAllAssets] = useState<any[]>([]),
-    [params, setParams] = useState<{ asset?: string }>({}),
+    [params, setParams] = useState<{ asset?: string; company?: string }>({}),
     [loading, setLoading] = useState(true),
     [error, setError] = useState("");
+
   useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
     setParams({
-      asset:
-        new URLSearchParams(window.location.search).get("asset") || undefined,
+      asset: q.get("asset") || undefined,
+      company: q.get("company") || undefined,
     });
+
     getAssets()
       .then(setAllAssets)
       .catch((e) => setError(apiError(e)))
       .finally(() => setLoading(false));
   }, []);
+
   if (loading) return <main className="access-page">Loading report…</main>;
   if (error) return <main className="access-page">{error}</main>;
+
   const assets = params.asset
     ? allAssets.filter((a) => a.id === params.asset)
-    : allAssets;
+    : params.company
+      ? allAssets.filter((a) => a.company === params.company)
+      : allAssets;
+
+  const reportTitle = params.asset
+    ? "Asset summary report"
+    : params.company
+      ? params.company + " summary report"
+      : "Portfolio summary report";
+
   const photos = allAssets.flatMap((a) => a.photos);
+
   const date = new Date().toLocaleDateString("en-ZA", {
     timeZone: "Africa/Johannesburg",
   });
+
   return (
     <div className="report">
       <PrintControls />
@@ -55,13 +71,13 @@ function Report() {
         </div>
         <div className="cover-title">
           <div className="eyebrow">BILLBOARD ASSET MANAGEMENT</div>
-          <h1>
-            {params.asset ? "Asset summary report" : "Portfolio summary report"}
-          </h1>
+          <h1>{reportTitle}</h1>
           <p>
             {params.asset
-              ? "Asset " + String(params.asset)
-              : "All registered billboard assets"}
+              ? "Asset " + params.asset
+              : params.company
+                ? "Company: " + params.company
+                : "All registered billboard assets"}
           </p>
         </div>
         <img
@@ -82,8 +98,9 @@ function Report() {
             <dt>{params.asset ? "Location" : "Assets included"}</dt>
             <dd>
               {params.asset
-                ? assets[0]?.location || "Asset not found"
-                : assets.length}
+                ? assets[0]?.company || "Not recorded"
+                : params.company ||
+                  "Condition, priority, maintenance and photographs"}
             </dd>
           </div>
           <div>
@@ -103,14 +120,12 @@ function Report() {
         <img src="/1c-logo.png" alt="1C" />
         <div>
           <div className="eyebrow">BILLBOARD ASSET MANAGEMENT</div>
-          <h1>
-            {params.asset
-              ? "Asset summary report"
-              : "All assets summary report"}
-          </h1>
+          <h1>{reportTitle}</h1>
           <p>
-            {params.asset ? "Asset " + params.asset : "Portfolio overview"} ·{" "}
-            {date}
+            {params.asset
+              ? "Asset " + params.asset
+              : params.company || "Portfolio overview"}{" "}
+            · {date}
           </p>
           <p>Prepared by {user?.name}</p>
         </div>
@@ -216,6 +231,7 @@ function Report() {
           <div className="report-details">
             {[
               ["Company", a.company],
+              ["Element", a.element],
               ["Location", a.location],
               ["GPS coordinates", a.gps],
               ["Advertiser", a.advertiser],

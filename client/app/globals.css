@@ -2985,3 +2985,7 @@ img[src="/1c-logo.png"] {
 .sidebar .brand img {
   background: transparent;
 }
+
+.tools select[aria-label="Filter by company"] {
+  width: 220px;
+}
