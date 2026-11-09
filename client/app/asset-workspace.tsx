@@ -293,6 +293,7 @@ export default function App({
         <Header setScan={setScan} />
         <div className="workspace">
           <MobileNav
+            view={view}
             setView={setView}
             setSelected={setSelected}
             setEdit={setEdit}

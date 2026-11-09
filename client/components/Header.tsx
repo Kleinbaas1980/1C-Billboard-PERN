@@ -18,7 +18,7 @@ export default function Header({ setScan }: HeaderProps) {
         </a>
         <button onClick={() => setScan(true)}>
           <ScanLine size={18} />
-          Scan QR code
+          Scan
         </button>
       </div>
     </header>

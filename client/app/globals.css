@@ -1487,17 +1487,6 @@ a:hover {
   color: #888;
 }
 @media (max-width: 720px) {
-  .mobile-nav {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 22px;
-  }
-  .mobile-nav button,
-  .mobile-nav a {
-    padding: 8px 11px;
-    font-size: 12px;
-  }
   .asset-header-actions {
     flex-direction: column;
   }
@@ -2988,4 +2977,53 @@ img[src="/1c-logo.png"] {
 
 .tools select[aria-label="Filter by company"] {
   width: 220px;
+}
+/* Bottom tab bar (mobile only) */
+@media (max-width: 720px) {
+  .mobile-nav {
+    display: flex;
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 40;
+    margin: 0;
+    background: #fff;
+    border-top: 1px solid #e4e4e4;
+    box-shadow: 0 -2px 12px #0001;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .mobile-nav button,
+  .mobile-nav a {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 10px 4px 9px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: #777;
+    font-size: 11px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .mobile-nav button:hover,
+  .mobile-nav a:hover {
+    background: #f6f6f6;
+    text-decoration: none;
+  }
+  .mobile-nav .active {
+    color: #ff6b00;
+    box-shadow: inset 0 3px 0 #ff6b00;
+  }
+
+  /* keep page content and the brand credit clear of the bar */
+  .workspace {
+    padding-bottom: 96px;
+  }
+  .brand-credit {
+    bottom: calc(66px + env(safe-area-inset-bottom, 0px));
+  }
 }
