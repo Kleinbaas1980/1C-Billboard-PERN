@@ -39,7 +39,7 @@ export default function QRPage() {
           </>
         ) : (
           <>
-            <div className="eyebrow">BILLBOARD ASSET</div>
+            <div className="eyebrow">ASSET</div>
             <div className="qr-hero">
               <h1 className="qr-public-number">{row.id}</h1>
               {row.hasMainImage && (

@@ -337,7 +337,7 @@ export default function App({
           {view === "dashboard" && (
             <div className="stats no-print">
               <div className="urgent-stat">
-                <span>URGENT BOARDS · P1</span>
+                <span>ASSETS · P1</span>
                 <strong className={urgent.length ? "red" : ""}>
                   {urgent.length.toString().padStart(2, "0")}
                 </strong>
@@ -671,7 +671,7 @@ export default function App({
                   <h3>
                     {assets.length
                       ? "No matching assets"
-                      : "Your first billboard starts here"}
+                      : "Your first asset starts here"}
                   </h3>
                   <p>
                     {assets.length

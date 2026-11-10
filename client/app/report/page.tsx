@@ -74,14 +74,14 @@ function Report() {
           <span>OUTDOOR ADVERTISING</span>
         </div>
         <div className="cover-title">
-          <div className="eyebrow">BILLBOARD ASSET MANAGEMENT</div>
+          <div className="eyebrow">ASSET MANAGEMENT</div>
           <h1>{reportTitle}</h1>
           <p>
             {params.asset
               ? "Asset " + params.asset
               : params.company
                 ? "Company: " + params.company
-                : "All registered billboard assets"}
+                : "All registered assets"}
           </p>
         </div>
         <img
@@ -117,13 +117,13 @@ function Report() {
           </div>
         </dl>
         <div className="cover-footer">
-          1Crew1Project · Billboard assessment and maintenance
+          1Crew1Project · Asset assessment and maintenance
         </div>
       </section>
       <header className="report-header">
         <img src="/1c-logo.png" alt="1C" />
         <div>
-          <div className="eyebrow">BILLBOARD ASSET MANAGEMENT</div>
+          <div className="eyebrow">ASSET MANAGEMENT</div>
           <h1>{reportTitle}</h1>
           <p>
             {params.asset
@@ -285,7 +285,7 @@ function Report() {
         </article>
       ))}
       <footer className="report-footer">
-        1C · Billboard condition and maintenance summary · {date}
+        1C · Asset condition and maintenance summary · {date}
       </footer>
     </div>
   );

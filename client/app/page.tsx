@@ -32,7 +32,7 @@ export default function Launch() {
       </header>
       <main className="launch-main">
         <section className="launch-intro">
-          <div className="eyebrow">BILLBOARD ASSET MANAGEMENT</div>
+          <div className="eyebrow">ASSET MANAGEMENT</div>
           <h1>
             Your boards.
             <br />
@@ -61,7 +61,7 @@ export default function Launch() {
         </section>
       </main>
       <footer className="launch-footer">
-        <span>1C · Billboard asset management</span>
+        <span>1C · Asset management</span>
         <span>Scan. Assess. Maintain.</span>
       </footer>
     </div>
