@@ -8,9 +8,7 @@ interface HeaderProps {
 export default function Header({ setScan }: HeaderProps) {
   return (
     <header className="topbar no-print">
-      <span>
-        ASSET MANAGEMENT <span className="slash">/</span> BILLBOARDS
-      </span>
+      <span>ASSET MANAGEMENT</span>
       <div className="topbar-actions">
         <a className="button" href="/">
           <Home size={18} />

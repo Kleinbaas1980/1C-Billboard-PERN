@@ -1909,8 +1909,6 @@ a:hover {
   gap: 8px;
   font-size: 13px;
   font-weight: 600;
-  min-width: 260px;
-  max-width: 520px;
 }
 .report-selector select {
   padding: 12px;

@@ -63,7 +63,9 @@ function Report() {
       <ReportSelector
         assets={allAssets}
         selected={params.asset ? String(params.asset) : ""}
+        selectedCompany={params.company ?? ""}
       />
+
       <section className="report-cover">
         <div className="cover-angle cover-angle-orange" />
         <div className="cover-angle cover-angle-grey" />

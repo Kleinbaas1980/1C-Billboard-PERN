@@ -30,7 +30,7 @@ export default function PageHeader({
   return (
     <div className="page-heading no-print">
       <div>
-        <div className="eyebrow">YOUR BILLBOARD PORTFOLIO</div>
+        <div className="eyebrow">YOUR ASSET PORTFOLIO</div>
         <h1>
           {view === "dashboard" ? "Dashboard" : "Asset register"}
           <span>.</span>

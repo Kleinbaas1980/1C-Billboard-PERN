@@ -311,7 +311,10 @@ export default function App({
           />
           {!selected && !edit && (
             <div className="dashboard-reports no-print">
-              <a className="button primary" href="/report">
+              <a
+                className="button primary my-3 min-w-full md:min-w-50"
+                href="/report"
+              >
                 <FileText size={18} />
                 All assets summary report
               </a>
