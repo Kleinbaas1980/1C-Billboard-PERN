@@ -19,7 +19,11 @@ export default function ReportPage() {
 function Report() {
   const { user } = useAuth();
   const [allAssets, setAllAssets] = useState<any[]>([]),
-    [params, setParams] = useState<{ asset?: string; company?: string }>({}),
+    [params, setParams] = useState<{
+      asset?: string;
+      assets?: string[];
+      company?: string;
+    }>({}),
     [loading, setLoading] = useState(true),
     [error, setError] = useState("");
 
@@ -27,6 +31,7 @@ function Report() {
     const q = new URLSearchParams(window.location.search);
     setParams({
       asset: q.get("asset") || undefined,
+      assets: q.get("assets")?.split(",").filter(Boolean),
       company: q.get("company") || undefined,
     });
 
@@ -39,17 +44,23 @@ function Report() {
   if (loading) return <main className="access-page">Loading report…</main>;
   if (error) return <main className="access-page">{error}</main>;
 
+  const multi = !!params.assets?.length;
+
   const assets = params.asset
     ? allAssets.filter((a) => a.id === params.asset)
-    : params.company
-      ? allAssets.filter((a) => a.company === params.company)
-      : allAssets;
+    : multi
+      ? allAssets.filter((a) => params.assets!.includes(a.id))
+      : params.company
+        ? allAssets.filter((a) => a.company === params.company)
+        : allAssets;
 
   const reportTitle = params.asset
     ? "Asset summary report"
-    : params.company
-      ? params.company + " summary report"
-      : "Portfolio summary report";
+    : multi
+      ? "Selected assets report"
+      : params.company
+        ? params.company + " summary report"
+        : "Portfolio summary report";
 
   const photos = allAssets.flatMap((a) => a.photos);
 
@@ -63,6 +74,7 @@ function Report() {
       <ReportSelector
         assets={allAssets}
         selected={params.asset ? String(params.asset) : ""}
+        selectedIds={params.assets ?? []}
         selectedCompany={params.company ?? ""}
       />
 
@@ -79,9 +91,11 @@ function Report() {
           <p>
             {params.asset
               ? "Asset " + params.asset
-              : params.company
-                ? "Company: " + params.company
-                : "All registered assets"}
+              : multi
+                ? assets.length + " selected assets"
+                : params.company
+                  ? "Company: " + params.company
+                  : "All registered billboard assets"}
           </p>
         </div>
         <img
@@ -137,7 +151,7 @@ function Report() {
       <div className="report-metrics">
         <div>
           <b>{assets.length}</b>
-          <span>Boards included</span>
+          <span>Assets included</span>
         </div>
         <div>
           <b>{assets.filter(isUrgent).length}</b>
